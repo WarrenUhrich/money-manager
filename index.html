@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Money Manager</title>
+
+		<script>
+			const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
+			const budget = [];
+			function addItem(description="", amount="0.00", order=-1) {
+				const newOrder = order === -1 ? budget.length : parseInt(order);
+				const newItem = {id: uniqueId(), description, amount, order: newOrder};
+				budget.push(newItem);
+				valuesChanged();
+			}
+			function removeItem(id) {
+				const index = budget.findIndex(item => item.id === id);
+				if (index !== -1) array.splice(index, 1);
+				valuesChanged();
+			}
+			function updateItem(id, description, amount, order) {
+				const item = budget.find(item => item.id === id);
+				if (item && description) item.description = description;
+				if (item && amount) item.amount = amount;
+				if (item && order) item.order = order;
+				valuesChanged();
+			}
+			function submitAddNew(event) {
+				event.preventDefault();
+				addItem(event.target.description.value, event.target.amount.value);
+				event.target.description.value = '';
+				event.target.amount.value = '0.00';
+			}
+			function formatToHundredths(input) {
+				const formattedValue = parseFloat(input.value.replace(/[^0-9.-]/g, '')).toFixed(2);
+				input.value = isNaN(formattedValue) ? '0.00' : formattedValue;
+			}
+			function generateId(length=32) {
+				let id = '';
+				for(let i = 0; i < Number(length); i++) id += chars[Math.floor(Math.random() * chars.length)];
+				return id;
+			}
+			function uniqueId() {
+				let id = generateId();
+				if (budget.find(item => item.id === id)) return uniqueId();
+				return id;
+			}
+			function renderItems() {
+				const tbody = document.getElementById('items');
+				tbody.innerHTML = '';
+				budget.forEach(item => {
+					const tr = document.createElement('tr');
+					const tdDesc = document.createElement('td');
+					tdDesc.textContent = item.description;
+					tr.appendChild(tdDesc);
+					const tdAmount = document.createElement('td');
+					tdAmount.textContent = item.amount;
+					tr.appendChild(tdAmount);
+					const tdOrder = document.createElement('td');
+					tdOrder.textContent = item.order;
+					tr.appendChild(tdOrder);
+					tbody.appendChild(tr);
+				});
+			}
+			function valuesChanged() {
+				renderItems();
+				document.getElementById('earnings').textContent = budget.reduce((accumulator, item) => +item.amount > 0 ? accumulator + +item.amount : accumulator, 0);
+				document.getElementById('spending').textContent = Math.abs(budget.reduce((accumulator, item) => +item.amount < 0 ? accumulator + +item.amount : accumulator, 0));
+				document.getElementById('remaining').textContent = budget.reduce((accumulator, item) => accumulator + +item.amount, 0);
+			}
+ 		</script>
+ 	</head>
+ 	<body>
+ 		<h1>Money Manager</h1>
+
+		<form onSubmit="submitAddNew(event)">
+			<h2>Enter Your Monthly Information</h2>
+			<p>
+				Enter positive numbers for earnings and negative numbers for expenses.
+			</p>
+			<table>
+				<thead>
+					<tr>
+						<th>Description</th>
+						<th>Amount</th>
+						<th>Order</th>
+					</tr>
+				</thead>
+				<tbody id="items"></tbody>
+				<tfoot>
+					<tr>
+						<td>
+							<label for="description">Description</label>
+							<input id="description" type="text" minlength=1 maxlength=32>
+						</td>
+						<td>
+							<label for="amount">Amount</label>
+							<input id="amount" type="number" minlength=1 maxlength=32 step="0.01" value="0.00" onChange="formatToHundredths(this)">
+						</td>
+						<td>
+							<input type="submit" value="Add New Item">
+						</td>
+					</tr>
+					<tr>
+						<th>Total Earnings</th>
+						<th>Total Spending</th>
+						<th>Remaining</th>
+					</tr>
+					<tr>
+						<td id="earnings"></td>
+						<td id="spending"></td>
+						<td id="remaining"></td>
+					</tr>
+				</tfoot>
+			</table>
+		</form>
+ 	</body>
+</html>
