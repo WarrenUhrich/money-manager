@@ -14,9 +14,14 @@
 				budget.push(newItem);
 				valuesChanged();
 			}
-			function removeItem(id) {
+			function removeItemClick(event) {
+				event.target.removeEventListener('click', removeItemClick);
+				console.log('clicked!', event.target.dataset.id);
+				removeItem(event.target.dataset.id);
+			}
+			function removeItem(id=-1) {
 				const index = budget.findIndex(item => item.id === id);
-				if (index !== -1) array.splice(index, 1);
+				if (index !== -1) budget.splice(index, 1);
 				valuesChanged();
 			}
 			function updateItem(id, description, amount, order) {
@@ -49,7 +54,7 @@
 			function renderItems() {
 				const tbody = document.getElementById('items');
 				tbody.innerHTML = '';
-				budget.forEach(item => {
+				budget.forEach(function(item) {
 					const tr = document.createElement('tr');
 					const tdDesc = document.createElement('td');
 					tdDesc.textContent = item.description;
@@ -58,16 +63,22 @@
 					tdAmount.textContent = item.amount;
 					tr.appendChild(tdAmount);
 					const tdOrder = document.createElement('td');
-					tdOrder.textContent = item.order;
+					tdOrder.textContent = ' ' + item.order;
+					const removeBtn = document.createElement('button');
+					removeBtn.type = 'button';
+					removeBtn.textContent = 'Remove';
+					removeBtn.setAttribute('data-id', item.id);
+					removeBtn.addEventListener('click', removeItemClick);
+					tdOrder.prepend(removeBtn);
 					tr.appendChild(tdOrder);
 					tbody.appendChild(tr);
 				});
 			}
 			function valuesChanged() {
 				renderItems();
-				document.getElementById('earnings').textContent = budget.reduce((accumulator, item) => +item.amount > 0 ? accumulator + +item.amount : accumulator, 0);
-				document.getElementById('spending').textContent = Math.abs(budget.reduce((accumulator, item) => +item.amount < 0 ? accumulator + +item.amount : accumulator, 0));
-				document.getElementById('remaining').textContent = budget.reduce((accumulator, item) => accumulator + +item.amount, 0);
+				document.getElementById('earnings').textContent = budget.reduce((accumulator, item) => +item.amount > 0 ? accumulator + +item.amount : accumulator, 0).toFixed(2);
+				document.getElementById('spending').textContent = Math.abs(budget.reduce((accumulator, item) => +item.amount < 0 ? accumulator + +item.amount : accumulator, 0)).toFixed(2);
+				document.getElementById('remaining').textContent = budget.reduce((accumulator, item) => accumulator + +item.amount, 0).toFixed(2);
 			}
  		</script>
  	</head>
