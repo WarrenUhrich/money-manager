@@ -16,7 +16,6 @@
 			}
 			function removeItemClick(event) {
 				event.target.removeEventListener('click', removeItemClick);
-				console.log('clicked!', event.target.dataset.id);
 				removeItem(event.target.dataset.id);
 			}
 			function removeItem(id=-1) {
